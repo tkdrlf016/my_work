@@ -23,6 +23,7 @@ import math
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import QuaternionStamped
+from std_msgs.msg import Int32
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) +
                 "/../../PathPlanning/CubicSpline/")
 
@@ -51,7 +52,7 @@ class State(object):
     :param v: (float) speed
     """
 
-    def __init__(self, x=100.0, y=100.0, yaw=0.0, v=0.0):
+    def __init__(self, x=0.0, y=100.0, yaw=0.0, v=0.0):
         """Instantiate the object."""
         super(State, self).__init__()
         self.x = x
@@ -60,14 +61,23 @@ class State(object):
         self.v = v
         self.curr_x = 0
         self.curr_y = 0 
+        self.curr_section = 0
         rospy.init_node("stanley_controll")
         self.nav_msg = NavSatFix()
         self.path_publisher = rospy.Publisher("/path",NavSatFix,queue_size = 100)
         self.ros_msg = NavSatFix()
+        self.vel_msg = Int32()
         self.gnss_bool = 1
         self.gnss_subscriber = rospy.Subscriber("/gnss",NavSatFix,self.gnsscallback)
         self.car_yaw = rospy.Subscriber("/filter/quaternion",QuaternionStamped,self.yawcallback)
-        
+    def find_curr_section(self):
+        A =1
+
+
+    def switch_vel(self):
+        B =1
+
+
     def update(self, acceleration, delta):
         """
         Update the state of the vehicle.
@@ -255,8 +265,12 @@ def main():
 
     #ax = [0.0, 100.0,300.0,500.0,900.0, 1000.0, 1500.0, 1000.0,500.0,0.0,-500.0,-10.0]
     #ay = [0.0, 0.0,0.0,0.0,0.0, 0.0, 500.0, 1000.0,1000,1000,500,-10.0]
-    ax = [0.0, 10.0,30.0,50.0,90.0, 100.0, 150.0, 100.0,50.0,0.0,-50.0,-1.0]
-    ay = [0.0, 0.0,0.0,0.0,0.0, 0.0, 50.0, 100.0,100,100,50,-1.0]
+    #ax = [0.0, 10.0,30.0,50.0,90.0, 100.0, 150.0, 100.0,50.0,0.0,-50.0,-1.0]
+    #ay = [0.0, 0.0,0.0,0.0,0.0, 0.0, 50.0, 100.0,100,100,50,-1.0]
+    ax = [0, 10 , 20, 30, 40]
+    ay = [0, 150, 0, 150, 0]
+    between_vel = [10,11,12,13]
+   
     #ay = [37.11589,37.11589,37.11589,37.11589]
     #ax = [427.1,30,20,0]
     #ay = [37.11589,37.11589]
@@ -265,7 +279,7 @@ def main():
     #ax = [0.0,100.0]
     #ax = [126 , 186]
     #ay = [37,97]	
-    cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(
+    cx, cy, cyaw, ck, s ,a = cubic_spline_planner.calc_spline_course(
         ax, ay, ds=2.5)
     #print(cx)
     #print(cy)
@@ -277,7 +291,6 @@ def main():
         path_msg.poses.append(pose_msg)
     ''' 
     
-
     '''
     for i in range(0,len(cx)):
         
@@ -291,12 +304,12 @@ def main():
     '''
     #path_publisher.publish(mark_msg)  
     #path_publisher.publish(path_msg)
-    target_speed = 1.0 / 3.6  # [m/s]
+    target_speed = 0 / 3.6  # [m/s]
 
     max_simulation_time = 100.0
 
     # Initial state
-    state = State(x=100.0, y=100.0, yaw=np.radians(20.0), v=0.0)
+    state = State(x=0.0, y=20.0, yaw=np.radians(20.0), v=0.0)
     
     last_idx = len(cx) - 1
     time = 0.0
@@ -307,10 +320,10 @@ def main():
     #yaw = [state.yaw]
     v = [state.v]
     t = [0.0]
-    
+    '''
     while state.func_gnss_bool():
         print("gnss is not sended")
-    
+    '''
     x = [state.x]
     y = [state.y]
     yaw = [state.yaw]
@@ -318,14 +331,14 @@ def main():
     target_idx, _ = calc_target_index(state, cx, cy)
     while 1: #max_simulation_time >= time and last_idx > target_idx:
         ai = pid_control(target_speed, state.v)
-        print("-=-=-=-=-=-=")
-        print(state.x)
-        print(state.y)
-        di, target_idx = stanley_control(state, cx, cy, cyaw, target_idx)
-        state.update(ai, di)
+        #print("-=-=-=-=-=-=")
+        #print(state.x)
+        #print(state.y)
+        
+        #state.update(ai, di)
         #state.update(ai, di)
         time += dt
-       
+        state.x += 0.1
         x.append(state.x)
         y.append(state.y)
         #x.append(state.x)
@@ -333,13 +346,20 @@ def main():
         yaw.append(state.yaw)
         v.append(state.v)
         t.append(time)
+
+        di, target_idx = stanley_control(state, cx, cy, cyaw, target_idx)
+        for i in range(1,len(a)):
+            if (target_idx <= a[i]) and (target_idx >= a[i-1]):
+                print(i)
+                print(between_vel[i-1])
+        
+
+
         #path_publisher.publish(mark_msg)
         #path_publisher.publish(path_msg)
         if show_animation:  # pragma: no cover
             plt.cla()
-            # for stopping simulation with the esc key.
-            plt.gcf().canvas.mpl_connect('key_release_event',
-                    lambda event: [exit(0) if event.key == 'escape' else None])
+            # for stopping simulationayxit(0) if event.key == 'escape' else None])
             plt.plot(cx, cy, ".r", label="course")
             plt.plot(x, y, ".b", label="trajectory")
             plt.plot(cx[target_idx], cy[target_idx], "xg", label="target")

@@ -133,17 +133,23 @@ class Spline2D:
     """
 
     def __init__(self, x, y):
-        self.s = self.__calc_s(x, y)
+        self.s,self.a = self.__calc_s(x, y)
         self.sx = Spline(self.s, x)
         self.sy = Spline(self.s, y)
 
     def __calc_s(self, x, y):
+        
         dx = np.diff(x)
         dy = np.diff(y)
         self.ds = np.hypot(dx, dy)
         s = [0]
+        a = []
         s.extend(np.cumsum(self.ds))
-        return s
+        print(s)
+        for i in s:
+            a.append(i/2.5)
+        print(s)
+        return s,a
 
     def calc_position(self, s):
         """
@@ -178,7 +184,7 @@ class Spline2D:
 def calc_spline_course(x, y, ds=0.1):
     sp = Spline2D(x, y)
     s = list(np.arange(0, sp.s[-1], ds))
-
+    #print(s)
     rx, ry, ryaw, rk = [], [], [], []
     for i_s in s:
         ix, iy = sp.calc_position(i_s)
@@ -187,7 +193,7 @@ def calc_spline_course(x, y, ds=0.1):
         ryaw.append(sp.calc_yaw(i_s))
         rk.append(sp.calc_curvature(i_s))
 
-    return rx, ry, ryaw, rk, s
+    return rx, ry, ryaw, rk, s,sp.a
 
 
 def main():  # pragma: no cover
