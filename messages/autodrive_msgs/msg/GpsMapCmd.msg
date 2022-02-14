@@ -1,0 +1,10 @@
+Header header
+int32 point_id
+float32 utm_x
+float32 utm_y
+float32 velocity_normal
+float32 velocyty_stop
+int32 LaneType
+int32 LightSigStat
+bool gBoolTraffic_stop
+int32 final_point_id

@@ -1,0 +1,6 @@
+Header header
+int64 vehicleHeadingAngle
+int64 vehicle2targetAngle
+int64 resultTargetAngle
+int32 curPosMapId
+int32 tarPosMapId

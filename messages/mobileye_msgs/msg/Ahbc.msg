@@ -1,0 +1,11 @@
+# Constant
+uint8 BEAM_DECISION_NO_RECOMMENDATION = 0
+uint8 BEAM_DECISION_RECOMMENDATION_OFF = 1
+uint8 BEAM_DECISION_RECOMMENDATION_ON = 2
+uint8 BEAM_DECISION_INVALID = 3
+
+# Message
+Header header
+
+uint8 beam_decision
+uint16 reasons

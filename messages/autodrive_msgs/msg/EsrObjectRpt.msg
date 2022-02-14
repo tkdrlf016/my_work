@@ -1,0 +1,4 @@
+Header header
+float32 CIPV_radar_range
+float32 CIPV_radar_angle
+float32 CIPV_radar_range_rate

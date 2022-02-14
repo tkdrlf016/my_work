@@ -1,0 +1,8 @@
+string lineID
+int32 intersectionID
+int32 signalGroupID
+int32 movementPhaseState1st
+int32 timeChangeDetails1st
+int32 movementPhaseState2nd
+int32 timeChangeDetails2nd
+string nodeID
