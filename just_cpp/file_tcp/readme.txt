@@ -4,4 +4,5 @@
 
 컴파일 할때 명령어 
 
-gcc -o client client.cpp -lstdc++ -ljson-c
+gcc -o client client.cpp -lstdc++ -ljson-c -lpthread
+

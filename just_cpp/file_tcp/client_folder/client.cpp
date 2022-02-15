@@ -1,8 +1,8 @@
 
 #include <iostream>
+#include <json-c/json.h>
 #include "tcp_client.h"
 #include "client_tx_data.h"
-#include <json-c/json.h>
 int main(int argc, char* argv[]){
 	set_time();
 	set_up_var();
@@ -17,8 +17,9 @@ int main(int argc, char* argv[]){
 		printf("read() error!");
 	printf("Message from server: %s \n", message);
 	*/
-	pthread_create(&r_thread,NULL,rsv_callback,(void *)serv_sock);
+
 	write_data();
+	pthread_create(&r_thread,NULL,rsv_callback,(void *)serv_sock);
 	
 	FILE* file = NULL;
 	size_t fsize, nsize = 0;

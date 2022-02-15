@@ -17,6 +17,7 @@ int str_len, len;
 struct sockaddr_in serv_addr;
 pthread_t r_thread;
 
+
 void tcp_open(int argc, char* argv[])
 {
 	if(argc!=3){
@@ -36,25 +37,40 @@ void tcp_open(int argc, char* argv[])
 	if(connect(serv_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1) 
 		printf("connect() error!");
 }
+
 void * rsv_callback(void * arg){
+	printf("1\n");
     char buf[256];
-	int serv_sock = *(int*)arg;
+	printf("2\n");
+	int sock = *((int*)&arg);;
+	printf("3\n");
     int nbyte = 256;
-    size_t filesize = 0, bufsize = 0;
+	printf("4\n");
+    size_t filesize = 0, bufsize = 256;
+	printf("5\n");
     FILE *file = NULL;
+	printf("6\n");
     file = fopen("b.json", "wb");
+	printf("7\n");
 	while(1){
-        nbyte = recv(serv_sock, buf, bufsize, 0);
+		printf("b\n");
+        nbyte = recv(sock, buf, bufsize, 0);
+		printf("c\n");
         if(nbyte == -1)
         {
+			printf("d\n");
             nbyte = 0;
         }else{
+			printf("e\n");
             fwrite(buf, sizeof(char), nbyte, file);
         }
+		printf("f\n");
 	}
     fclose(file);
 	pthread_exit(0);
 	return NULL;
+	
 }
+
 
 #endif 
