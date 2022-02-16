@@ -4,7 +4,7 @@
 #include <ctime>
 #include <cstring>
 #include <json-c/json.h>
-
+#include "tcp_client.h"
 /*public_var*/
 time_t curTime;
 struct tm pLocal;
@@ -26,8 +26,13 @@ uint32_t high_level_error;
 uint32_t low_level_error;
 
 /*json var*/
-//json_object *tx_dates;
+json_object *tx_dates;
 
+
+/*send data*/
+FILE* file = NULL;
+size_t fsize, nsize = 0;
+char buf[256];
 /*func*/
 
 
@@ -54,10 +59,36 @@ void set_time()
 
 void write_data()
 {
-    json_object *myObj = json_object_new_object();
-    json_object_object_add(myObj, "나이", json_object_new_int(45));
-    json_object_object_add(myObj, "기혼", json_object_new_boolean(1));
-    json_object_to_file("sample.json",myObj);
+    tx_dates = json_object_new_object();
+    json_object_object_add(tx_dates, "ctrl_mode", json_object_new_int(0));
+    json_object_object_add(tx_dates, "go_or_stop", json_object_new_int(0));
+    json_object_object_add(tx_dates, "emergency", json_object_new_int(0));
+    json_object_object_add(tx_dates, "chk_sum", json_object_new_int(0));
+    json_object_object_add(tx_dates, "scenario", json_object_new_string("a scenario"));
+    json_object_object_add(tx_dates, "pos_x", json_object_new_int(0));
+    json_object_object_add(tx_dates, "pos_y", json_object_new_int(0));
+    json_object_object_add(tx_dates, "ang", json_object_new_int(0));
+    json_object_object_add(tx_dates, "spd", json_object_new_int(0));
+    json_object_object_add(tx_dates, "acc", json_object_new_int(0));
+    json_object_object_add(tx_dates, "yaw", json_object_new_int(0));
+    json_object_object_add(tx_dates, "high_level_error", json_object_new_int(0));
+    json_object_object_add(tx_dates, "high_level_error", json_object_new_int(0));
+    json_object_to_file("sample.json",tx_dates);
+}
+
+void send_data()
+{
+    file = fopen("sample.json" , "rb");
+    fseek(file, 0, SEEK_END);
+	fsize=ftell(file);
+	fseek(file, 0, SEEK_SET);
+    int fpsize = fread(buf, 1, 256, file);
+	send(serv_sock, buf, fpsize, 0);
+    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    //printf("%s\n",buf);
+    //printf("%d\n",sizeof(buf));
+    fclose(file);
+    sleep(2);
 }
 
 

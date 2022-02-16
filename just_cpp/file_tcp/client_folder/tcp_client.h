@@ -1,7 +1,7 @@
 #ifndef TCP_CLIENT_H
 #define TCP_CLIENT_H
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
@@ -39,37 +39,34 @@ void tcp_open(int argc, char* argv[])
 }
 
 void * rsv_callback(void * arg){
-	printf("1\n");
-    char buf[256];
-	printf("2\n");
-	int sock = *((int*)&arg);;
-	printf("3\n");
-    int nbyte = 256;
-	printf("4\n");
+    
+	//int sock = (int)arg;
+    int nbyte = 0;
     size_t filesize = 0, bufsize = 256;
-	printf("5\n");
     FILE *file = NULL;
-	printf("6\n");
-    file = fopen("b.json", "wb");
-	printf("7\n");
-	while(1){
-		printf("b\n");
-        nbyte = recv(sock, buf, bufsize, 0);
-		printf("c\n");
+    //file = fopen("b.json", "wb");
+	while(1)
+	{	
+		file = fopen("b.json", "w");
+		char buf[256] ;
+
+        nbyte = recv(serv_sock, buf, bufsize, 0);
+		printf("%s",buf);
         if(nbyte == -1)
         {
-			printf("d\n");
+			printf("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ");
             nbyte = 0;
         }else{
-			printf("e\n");
+			printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             fwrite(buf, sizeof(char), nbyte, file);
+			nbyte = 0;
+
         }
-		printf("f\n");
+		fclose(file);
+		sleep(2);
 	}
-    fclose(file);
 	pthread_exit(0);
-	return NULL;
-	
+	return NULL;	
 }
 
 

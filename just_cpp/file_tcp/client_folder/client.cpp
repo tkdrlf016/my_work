@@ -7,7 +7,6 @@ int main(int argc, char* argv[]){
 	set_time();
 	set_up_var();
 
-	char message[30], buf[BUFSIZ];
 
 	tcp_open(argc,argv);
 	/*
@@ -18,13 +17,14 @@ int main(int argc, char* argv[]){
 	printf("Message from server: %s \n", message);
 	*/
 
-	write_data();
+
 	pthread_create(&r_thread,NULL,rsv_callback,(void *)serv_sock);
-	
+
+	/*
+	write_data();
 	FILE* file = NULL;
 	size_t fsize, nsize = 0;
     
-
 	file = fopen("a.json" , "rb");
 
 	fseek(file, 0, SEEK_END);
@@ -40,7 +40,12 @@ int main(int argc, char* argv[]){
 		nsize += fpsize;
 		send(serv_sock, buf, fpsize, 0);
 	}	
-
+	*/
+	while(1)
+	{
+		write_data();
+		send_data();
+	}
 	fclose(file);
 	close(serv_sock);
 	return 0;

@@ -5,13 +5,16 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <iostream>
+#include <json-c/json.h>
 void printf(char *message);
-
+FILE* file2 = NULL;
+size_t fsize2, nsize2 = 0;
+char buf2[256];
 int main(int argc, char *argv[])
 {
 	int serv_sock;
 	int clnt_sock;
-	char buf[256];
+	//char buf[256];
 	struct sockaddr_in serv_addr;
 	struct sockaddr_in clnt_addr;
 	socklen_t clnt_addr_size;
@@ -44,11 +47,11 @@ int main(int argc, char *argv[])
 		printf("accept() error");  
 	
 	write(clnt_sock, message, sizeof(message));
-	int nbyte = 256;
+	int nbyte = 0;
     size_t filesize = 0, bufsize = 0;
     FILE *file = NULL;
 
-    file = fopen("b.json"/* 새로 만들 파일 이름 */, "wb");
+    //file = fopen("b.json"/* 새로 만들 파일 이름 */, "wb");
 
     //ntohl(filesize);
 	//recv filesize
@@ -58,20 +61,61 @@ int main(int argc, char *argv[])
 	//printf("file size = [%ld]\n", filesize);
     bufsize = 256;
 
-    while(/*filesize != 0*/nbyte!=0) {
+    while(/*filesize != 0*/1) {
+		printf("&*&*&*&*&*\n");
  		//if(filesize < 256) bufsize = filesize;
+		file = fopen("b.json"/* 새로 만들 파일 이름 */, "w");
+		printf("%d    @@@@@\n",nbyte);
+		char buf[256] = {};
+
         nbyte = recv(clnt_sock, buf, bufsize, 0);
+
 		if(nbyte == -1)
 		{	
 			printf("this is error");
 			break;
 		}
-		printf("%s",buf);
+		//printf("%s\n",buf);
 		//printf("filesize:%ld nbyte: %d\n", filesize, nbyte);
-        printf("))))))))))))%d\n",nbyte);
- 		//filesize = filesize -nbyte;
+        printf("---------------------------------------------%d\n",nbyte);
+		//filesize = filesize -nbyte;
+		
         fwrite(buf, sizeof(char), nbyte, file);		
-        //nbyte = 0;
+        nbyte = 0;
+		fclose(file);
+		printf("::::::::::::::::::::::::::");
+		///////////////////////////////////////////////
+		
+		json_object * tx_dates = json_object_new_object();
+    	json_object_object_add(tx_dates, "ctrl_mode", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "go_or_stop", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "emergency", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "chk_sum", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "scenario", json_object_new_string("a scenario"));
+    	json_object_object_add(tx_dates, "pos_x", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "pos_y", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "ang", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "spd", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "acc", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "yaw", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "high_level_error", json_object_new_int(0));
+    	json_object_object_add(tx_dates, "high_level_error", json_object_new_int(0));
+    	json_object_to_file("sample.json",tx_dates);
+		
+		file2 = fopen("sample.json" , "rb");
+    	fseek(file2, 0, SEEK_END);
+		fsize2=ftell(file2);
+		fseek(file2, 0, SEEK_SET);
+    	int fpsize2 = fread(buf2, 1, 256, file2);
+		send(clnt_sock, buf2, fpsize2, 0);
+		
+   	 	printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    	printf("%s\n",buf2);
+    	printf("%d\n",nbyte);
+    	fclose(file2);
+		
+		///////////////////////////////////////////////
+		sleep(2);
     }
  
 /*
@@ -80,7 +124,7 @@ int main(int argc, char *argv[])
 	}
 */	
 
-	fclose(file);
+	//fclose(file);
 	close(clnt_sock);	
 	close(serv_sock);
 	return 0;
