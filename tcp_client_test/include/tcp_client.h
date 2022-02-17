@@ -10,7 +10,9 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <pthread.h>
-
+#include <json-c/json.h>
+#include "client_tx_data.h"
+//#include "../include/json-c/json.h"
 
 int serv_sock, fd;
 int str_len, len;
@@ -40,7 +42,7 @@ void tcp_open(int argc, char* argv[])
 
 void * rsv_callback(void * arg){
     
-    //int sock = (int)arg;
+	//int sock = (int)arg;
     int nbyte = 0;
     size_t filesize = 0, bufsize = 256;
     FILE *file = NULL;

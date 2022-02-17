@@ -11,8 +11,8 @@
 #define std_y 127.078531
 #define rad(x) x*3.14159/180.0
 
-double my_x = 37.209298;
-double my_y = 127.080638;
+double my_x = 37.209765;
+double my_y = 127.070641;
 geometry_msgs::TransformStamped odom_trans;
 
 struct tagPT
@@ -28,11 +28,15 @@ void GetDistance()
         tagPT pt1;
 	tagPT pt2;
         double th;
-	pt1.y = 37.214643;
-	pt1.x = 127.078531;
-	pt2.y = 37.209298;
-	pt2.x = 127.080638;
+	pt1.y = 37.2146430000;
+	pt1.x = 127.0785310000;
+	//pt2.y = 37.2097650000;
+	//pt2.x = 127.0706410000;
+	pt2.y = 37.218467;
+	pt2.x = 127.077266;
         th = atan2(pt2.y - pt1.y,pt2.x - pt1.x);
+        ROS_INFO("%lf",rad(th));
+        //th = atan2(pt1.y - pt2.y,pt1.x - pt2.x);
 	double dLat = rad( (pt2.y-pt1.y) );
 	double dLon = rad( (pt2.x-pt1.x) );
 
