@@ -14,7 +14,6 @@
 double my_x = 37.209765;
 double my_y = 127.070641;
 geometry_msgs::TransformStamped odom_trans;
-
 struct tagPT
 {
 	double x;
