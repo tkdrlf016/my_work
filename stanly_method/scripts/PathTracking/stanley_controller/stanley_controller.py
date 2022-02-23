@@ -20,6 +20,7 @@ import sys
 import os
 import rospy
 import math
+
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import QuaternionStamped
@@ -43,17 +44,8 @@ show_animation = True
 
 
 class State(object):
-    """
-    Class representing the state of a vehicle.
-
-    :param x: (float) x-coordinate
-    :param y: (float) y-coordinate
-    :param yaw: (float) yaw angle
-    :param v: (float) speed
-    """
 
     def __init__(self, x=0.0, y=100.0, yaw=0.0, v=0.0):
-        """Instantiate the object."""
         super(State, self).__init__()
         self.x = x
         self.y = y
@@ -77,37 +69,13 @@ class State(object):
     def switch_vel(self):
         B =1
 
-
-    def update(self, acceleration, delta):
-        """
-        Update the state of the vehicle.
-
-        Stanley Control uses bicycle model.
-
-        :param acceleration: (float) Acceleration
-        :param delta: (float) Steering
-        """
-        delta = np.clip(delta, -max_steer, max_steer)
-
-        #self.x += self.v * np.cos(self.yaw) * dt
-        #self.y += self.v * np.sin(self.yaw) * dt
-        #self.x = self.curr_x
-        #self.y = self.curr_y
-        #self.yaw += self.v / L * np.tan(delta) * dt
-        #self.yaw = normalize_angle(self.yaw)
-        self.v += acceleration * dt
-
     def set_xy(self,x,y):
         self.nav_msg.longitude = x
         self.nav_msg.latitude = y
         self.path_publisher.publish(self.nav_msg)
 
     def gnsscallback(self,data):
-        #print("-=-=-=-=")
         self.gnss_bool = 0
-        #print(data.longitude)
-        #print(data.latitude)
-        #print(self.yaw)
         self.x = data.longitude
         self.y = data.latitude
     
@@ -145,49 +113,26 @@ class State(object):
 
 
 def pid_control(target, current):
-    """
-    Proportional control for the speed.
 
-    :param target: (float)
-    :param current: (float)
-    :return: (float)
-    """
     return Kp * (target - current)
 
 
 def stanley_control(state, cx, cy, cyaw, last_target_idx):
-    """
-    Stanley steering control.
 
-    :param state: (State object)
-    :param cx: ([float])
-    :param cy: ([float])
-    :param cyaw: ([float])
-    :param last_target_idx: (int)
-    :return: (float, int)
-    """
     current_target_idx, error_front_axle = calc_target_index(state, cx, cy)
-
+    current_target_idx += 5
     if last_target_idx >= current_target_idx:
         current_target_idx = last_target_idx
 
-    # theta_e corrects the heading error
     theta_e = normalize_angle(cyaw[current_target_idx] - state.yaw)
-    # theta_d corrects the cross track error
     theta_d = np.arctan2(k * error_front_axle, state.v)
-    # Steering control
     delta = theta_e + theta_d
 
     return delta, current_target_idx
 
 
 def normalize_angle(angle):
-    """
-    Normalize an angle to [-pi, pi].
 
-    :param angle: (float)
-    :return: (float) Angle in radian in [-pi, pi]
-    """
     while angle > np.pi:
         angle -= 2.0 * np.pi
 
@@ -198,25 +143,14 @@ def normalize_angle(angle):
 
 
 def calc_target_index(state, cx, cy):
-    """
-    Compute index in the trajectory list of the target.
-
-    :param state: (State object)
-    :param cx: [float]
-    :param cy: [float]
-    :return: (int, float)
-    """
-    # Calc front axle position
     fx = state.x  + L * np.cos(state.yaw)
     fy = state.y  + L * np.sin(state.yaw)
 
-    # Search nearest point index
     dx = [fx - icx for icx in cx]
     dy = [fy - icy for icy in cy]
     d = np.hypot(dx, dy)
     target_idx = np.argmin(d)
 
-    # Project RMS error onto front axle vector
     front_axle_vec = [-np.cos(state.yaw + np.pi / 2),
                       -np.sin(state.yaw + np.pi / 2)]
     error_front_axle = np.dot([dx[target_idx], dy[target_idx]], front_axle_vec)
@@ -226,172 +160,59 @@ def calc_target_index(state, cx, cy):
 
 
 def main():
-    """Plot an example of Stanley steering control on a cubic spline."""
-    #  target course
-    #ax = [0.0, 100.0, 100.0, 50.0, 60.0]
-    #ay = [0.0, 0.0, -30.0, -20.0, 0.0]
-    #ax = [0.0, 50.0, 25.0, 0.0, 25.0]
-    #ay = [0.0, 30.0, 70.0, 70.0, -10.0]
-    #rospy.init_node("stanley_controll")
-    '''
-    mark_msg = MarkerArray()
-    marker = Marker()
-    marker.header.frame_id = "/map"
-    marker.type = 2
-    marker.action = 2
-    marker.pose = Pose()
-    marker.color.r = 0.0
-    marker.color.g = 0.0
-    marker.color.b = 0.0
-    marker.color.a = 0.0
-    marker.scale.x = 0.1
-    marker.scale.y = 0.1
-    marker.scale.z = 0.1
-    marker.frame_locked = False
-    marker.ns = "Goal"
-    path_publisher = rospy.Publisher("/path", MarkerArray, queue_size=1)
-    '''
-    '''
-    path_msg = Path()
-    path_msg.header.frame_id = "/map"
-    pose_msg = PoseStamped()
-    path_publisher = rospy.Publisher("/path",Path,queue_size = 1000)
-    '''
-    
-    #nav_msg = NavSatFix()
-    #path_publisher = rospy.Publisher("/path",NavSatFix,queue_size = 100)
-    #os_msg = NavSatFix()
-    #gnss_subscriber = rospy.Subscriber("/gnss",NavSatFix,gnsscallback)
-
-    #ax = [0.0, 100.0,300.0,500.0,900.0, 1000.0, 1500.0, 1000.0,500.0,0.0,-500.0,-10.0]
-    #ay = [0.0, 0.0,0.0,0.0,0.0, 0.0, 500.0, 1000.0,1000,1000,500,-10.0]
-    #ax = [0.0, 10.0,30.0,50.0,90.0, 100.0, 150.0, 100.0,50.0,0.0,-50.0,-1.0]
-    #ay = [0.0, 0.0,0.0,0.0,0.0, 0.0, 50.0, 100.0,100,100,50,-1.0]
-    ax = [0, 10 , 20, 30, 40]
+    ax = [0, 40 , 80, 120, 160]
     ay = [0, 150, 0, 150, 0]
     between_vel = [10,11,12,13]
-   
-    #ay = [37.11589,37.11589,37.11589,37.11589]
-    #ax = [427.1,30,20,0]
-    #ay = [37.11589,37.11589]
-    #ax = [0 , 100]
-    #ay = [0.0,100.0]
-    #ax = [0.0,100.0]
-    #ax = [126 , 186]
-    #ay = [37,97]	
     cx, cy, cyaw, ck, s ,a = cubic_spline_planner.calc_spline_course(
         ax, ay, ds=2.5)
-    #print(cx)
-    #print(cy)
-    '''
-    for i in cx[:]:
-        pose_msg.pose.position.x = i
-    for i in cy[:]:
-        pose_msg.pose.position.y = i
-        path_msg.poses.append(pose_msg)
-    ''' 
-    
-    '''
-    for i in range(0,len(cx)):
-        
-        nav_msg.longitude = cx[i]
-        nav_msg.latitude = cy[i]
-        nav_publisher.publish(nav_msg)
-        
-    	marker.pose.position.x = cx[i]
-    	marker.pose.position.y = cy[i]
-        mark_msg.markers.append(marker)
-    '''
-    #path_publisher.publish(mark_msg)  
-    #path_publisher.publish(path_msg)
     target_speed = 0 / 3.6  # [m/s]
 
     max_simulation_time = 100.0
 
-    # Initial state
-    state = State(x=0.0, y=20.0, yaw=np.radians(20.0), v=0.0)
+    state = State(x=0.0, y=20.0, yaw=np.radians(90.0), v=0.0)
     
     last_idx = len(cx) - 1
     time = 0.0
-    #x = [state.x]
-    #y = [state.y]
-    #x = []
-    #y = []
-    #yaw = [state.yaw]
     v = [state.v]
     t = [0.0]
-    '''
-    while state.func_gnss_bool():
-        print("gnss is not sended")
-    '''
     x = [state.x]
     y = [state.y]
     yaw = [state.yaw]
     
     target_idx, _ = calc_target_index(state, cx, cy)
-    while 1: #max_simulation_time >= time and last_idx > target_idx:
+    rate = rospy.Rate(5)
+    while 1: 
         ai = pid_control(target_speed, state.v)
-        #print("-=-=-=-=-=-=")
-        #print(state.x)
-        #print(state.y)
-        
-        #state.update(ai, di)
-        #state.update(ai, di)
+ 
         time += dt
-        state.x += 0.1
+        state.x += 0.2
         x.append(state.x)
         y.append(state.y)
-        #x.append(state.x)
-        #y.append(state.y)
+ 
         yaw.append(state.yaw)
         v.append(state.v)
         t.append(time)
 
         di, target_idx = stanley_control(state, cx, cy, cyaw, target_idx)
+        print((state.yaw*180/3.141592)-(math.atan2((cy[target_idx]-state.y),(cx[target_idx]-state.x)))*180/3.141592)
         for i in range(1,len(a)):
             if (target_idx <= a[i]) and (target_idx >= a[i-1]):
                 print(i)
                 print(between_vel[i-1])
-        
+        rate.sleep()
 
 
-        #path_publisher.publish(mark_msg)
-        #path_publisher.publish(path_msg)
-        if show_animation:  # pragma: no cover
+
+        if show_animation:
             plt.cla()
-            # for stopping simulationayxit(0) if event.key == 'escape' else None])
             plt.plot(cx, cy, ".r", label="course")
             plt.plot(x, y, ".b", label="trajectory")
             plt.plot(cx[target_idx], cy[target_idx], "xg", label="target")
-            #nav_msg.longitude = cx[target_idx]
-            #nav_msg.latitude = cy[target_idx]
             state.set_xy(cx[target_idx],cy[target_idx])
-            #path_publisher.publish(nav_msg)
             plt.axis("equal")
             plt.grid(True)
             plt.title("Speed[km/h]:" + str(state.v * 3.6)[:4])
             plt.pause(0.001)
-
-    # Test
-'''
-    assert last_idx >= target_idx, "Cannot reach goal"
-
-    if show_animation:  # pragma: no cover
-        plt.plot(cx, cy, ".r", label="course")
-        plt.plot(x, y, "-b", label="trajectory")
-        plt.legend()
-        plt.xlabel("x[m]")
-        plt.ylabel("y[m]")
-        plt.axis("equal")
-        plt.grid(True)
-
-        plt.subplots(1)
-        plt.plot(t, [iv * 3.6 for iv in v], "-r")
-        plt.xlabel("Time[s]")
-        plt.ylabel("Speed[km/h]")
-        plt.grid(True)
-        plt.show()
-'''
 
 if __name__ == '__main__':
     main()

@@ -6,8 +6,8 @@ from std_msgs.msg import Int32
 
 rospy.init_node("uart_driver_node")
 pub = rospy.Publisher("/lory/emergency",Int32)
-print("UART Demonstration Program!!")
-print("NVIDIA Jetson Nano Developer Kit!!")
+print("UART Demonstration Program")
+print("NVIDIA Jetson Nano Developer Kit")
 msg = 0
 
 serial_port = serial.Serial(
@@ -18,7 +18,7 @@ serial_port = serial.Serial(
     stopbits=serial.STOPBITS_ONE,
 )
 # Wait a second to let the port initialize
-#time.sleep(1)
+time.sleep(1)
 
 try:
     # Send a simple header
@@ -27,7 +27,7 @@ try:
     while True:
         if serial_port.inWaiting() > 0:
             data = serial_port.read()
-            #print(data)
+            print(data)
             if data == '1':
                 print('not ok')
                 msg = 1
