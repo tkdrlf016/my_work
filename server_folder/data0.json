@@ -1,0 +1,51 @@
+{
+   "Description" : {
+      "File_name" : "SOC_VRU_AEB_AREA_0_DATE.json",
+      "Robot_type" : "type_A"
+   },
+   "Waypoints" : {
+      "Waypoint[0]" : {
+         "Accel" : 0,
+         "Attribute" : "Start_point \n",
+         "Pos" : {"lat":"38.118902","lng":"127.081990"},
+         "Segmenttype" : "None",
+         "Speed" : 0
+      },
+      "Waypoint[1]" : {
+         "Accel" : "2",
+         "Attribute" : "Way_point \n",
+         "Pos" : {"lat":"38.118805","lng":"127.081977"},
+         "Segmenttype" : "straight",
+         "Speed" : "2"
+      },
+      "Waypoint[2]" : {
+         "Accel" : "3",
+         "Attribute" : "Way_point \n",
+         "Pos" : {"lat":"38.118636","lng":"127.081754"},
+         "Segmenttype" : "straight",
+         "Speed" : "3"
+      },
+      "Waypoint[3]" : {
+         "Accel" : "4",
+         "Attribute" : "Way_point \n",
+         "Pos" : {"lat":"38.118537","lng":"127.081583"},
+         "Segmenttype" : "straight",
+         "Speed" : "4"
+      },
+      "Waypoint[4]" : {
+         "Accel" : "5",
+         "Attribute" : "Way_point \n",
+         "Pos" : {"lat":"38.118435","lng":"127.081470"},
+         "Segmenttype" : "straight",
+         "Speed" : "5"
+      },
+      "Waypoint[5]" : {
+         "Accel" : -5,
+         "Attribute" : "End_point \n",
+         "Pos" : {"lat":"38.118400","lng":"127.081521"},
+         "Segmenttype" : "straight",
+         "Speed" : 0
+      },
+      "Waypoints_numbers" : 5
+   }
+}

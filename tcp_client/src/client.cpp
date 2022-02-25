@@ -4,13 +4,14 @@
 int main(int argc, char* argv[]){
 	ros::init(argc,argv, "tcp_client");
 	ros::NodeHandle nh;
-	car_status_sub = nh.subscribe("/ins/pub_can",100,rev_car_status);
-	car_commend_pub = nh.advertise<ufo_msgs::monitor_commend>("/ufo/commend",100);
+	
 	set_up_var();
+	set_publisher(nh);
 	tcp_open(argc,argv);
-	pthread_create(&r_thread,NULL,rsv_callback,(void *)serv_sock);
+	pthread_create(&r_thread,NULL,rsv_callback,(void *)argc);
 	while(1)
 	{
+		//publish_TCP_msg();
 		write_data();
 		send_data(serv_sock);
 		ros::spinOnce();

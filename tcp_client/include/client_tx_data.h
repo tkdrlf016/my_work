@@ -13,8 +13,8 @@
 #include <iostream>
 #include <ctime>
 #include <cstring>
-#include "ufo_msgs/car_status.h"
-#include "ufo_msgs/monitor_commend.h"
+#include <string>
+#include "TCP_msgs/TCP_pub.h"
 #include "ros/ros.h"
 //#include "../include/json-c/json.h"
 #include "tcp_client.h"
@@ -48,14 +48,13 @@ FILE* file = NULL;
 size_t fsize, nsize = 0;
 
 /*ROS var*/
-ros::Subscriber car_status_sub;
-ros::Publisher car_commend_pub;
-ufo_msgs::monitor_commend monitor_msg;
+
+
+
 /*func_d*/
 void set_up_var();
 void write_data();
 void send_data(int sock);
-void rev_car_status(const ufo_msgs::car_status::ConstPtr & msg);
 
 /*fun*/
 void set_up_var()
@@ -100,15 +99,10 @@ void send_data(int sock)
     int fpsize = fread(buf, 1, 256, file);
 	send(sock, buf, 256, 0);
     fclose(file);
-    /*must remove code*/
-    car_commend_pub.publish(monitor_msg);
     sleep(2);
 }
 
-void rev_car_status(const ufo_msgs::car_status::ConstPtr & msg)
-{
-    
-}
+
 
 
 #endif
